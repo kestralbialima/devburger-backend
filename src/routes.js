@@ -31,6 +31,9 @@ routes.post('/reset-password', ResetPasswordController.store);   // Define a nov
 routes.get('/products', ProductController.index);
 routes.get('/categories', CategoryController.index);
 
+// Rota que o Mercado Pago vai chamar
+routes.post('/orders/webhook', OrderController.handleWebhook);
+
 /* --- 🛡️ BARREIRA DE AUTENTICAÇÃO --- */
 // A partir daqui, todas as rotas exigem um Token JWT válido
 routes.use(authMiddleware);

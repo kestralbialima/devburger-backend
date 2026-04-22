@@ -1,34 +1,34 @@
-import Sequelize, { Model} from 'sequelize';
+import Sequelize, { Model } from 'sequelize';
 
 
 class Product extends Model {
-    static init(sequelize) {    
-super.init(
-    {
-name: Sequelize.STRING,
-price: Sequelize.INTEGER,
-description: Sequelize.TEXT,
-category_id: Sequelize.INTEGER,
-path: Sequelize.STRING,
-offer: Sequelize.BOOLEAN,
-is_bonus: Sequelize.BOOLEAN,
-url: {
-    type: Sequelize.VIRTUAL,
-    get() {
-        return `http://localhost:3001/products-file/${this.path}`
+  static init(sequelize) {
+    super.init(
+      {
+        name: Sequelize.STRING,
+        price: Sequelize.FLOAT,
+        description: Sequelize.TEXT,
+        category_id: Sequelize.INTEGER,
+        path: Sequelize.STRING,
+        offer: Sequelize.BOOLEAN,
+        is_bonus: Sequelize.BOOLEAN, // 🛡️ Sincronizado com o Beekeeper
+        url: {
+          type: Sequelize.VIRTUAL,
+          get() {
+            return `http://localhost:3001/products-file/${this.path}`
 
-    }
-}
-  },
-  
- {
+          }
+        }
+      },
+
+      {
         sequelize,
         tableName: 'products',
         underscored: true,
         timestamps: true
       },
     );
-    return this; 
+    return this;
   }
 
 

@@ -15,6 +15,7 @@ class ProductController {
       category_id: Yup.number().required(),
       description: Yup.string().transform(v => v.replace(/<[^>]+>/g, '')).min(10).required(),
       offer: Yup.boolean(),
+      is_bonus: Yup.boolean(), // ✅ Adicionado na validação
     });
 
     // 2. Executa a validação dos dados recebidos no corpo (body) da requisição
@@ -26,7 +27,7 @@ class ProductController {
 
     // 3. Desestruturação: Extrai os dados validados do corpo da requisição
     const { name, price, category_id, description, offer, is_bonus } = req.body;
-    
+
     // 4. Se a imagem é obrigatória no upload:
     if (!req.file) {
       return res.status(400).json({ error: 'Image file is required.' });
@@ -40,7 +41,8 @@ class ProductController {
       category_id,
       description,
       path: filename, // O path salva o nome do arquivo para compor a URL virtual
-      offer,
+      offer: offer || false,       // Garante que não vá null
+      is_bonus: is_bonus || false, // Garante que não vá null
     });
 
     return res.status(201).json({ ok: true, product: newProduct });
@@ -70,8 +72,8 @@ class ProductController {
 
     // 1. Identificação: Pega o ID da rota (ex: /products/15) e os dados do corpo
     const { id } = req.params;
-    const { name, price, category_id, description, offer, is_bonus } = req.body; 
-    
+    const { name, price, category_id, description, offer, is_bonus } = req.body;
+
     // 2. Busca no banco para verificar se o produto realmente existe
     const product = await Product.findByPk(id);
 
@@ -111,17 +113,26 @@ class ProductController {
    * Ele faz um "JOIN" com a tabela de categorias para trazer o nome da categoria junto.
    */
   async index(_req, res) {
-    const products = await Product.findAll({
-      include: [
-        {
-          model: Category,
-          as: 'category', // Deve ser o mesmo 'as' definido no associate do Model
-          attributes: ['id', 'name'],
-        },
-      ],
-    });
+    try {
+      const products = await Product.findAll({
+        include: [
+          {
+            model: Category,
+            as: 'category',
+            attributes: ['id', 'name'],
+          },
+        ],
+        order: [['name', 'ASC']], // Opcional: mantém a lista em ordem alfabética
+      });
 
-    return res.status(200).json({ products });
+      // Retornamos o array DIRETAMENTE. 
+      // Isso evita o erro de ".map is not a function" no React.
+      return res.status(200).json(products);
+
+    } catch (err) {
+      console.error('❌ Erro ao listar produtos:', err);
+      return res.status(500).json({ error: 'Internal server error' });
+    }
   }
 
   /**
