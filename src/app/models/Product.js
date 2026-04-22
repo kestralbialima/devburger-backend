@@ -12,11 +12,18 @@ class Product extends Model {
         path: Sequelize.STRING,
         offer: Sequelize.BOOLEAN,
         is_bonus: Sequelize.BOOLEAN, // 🛡️ Sincronizado com o Beekeeper
-        url: {
+       url: {
           type: Sequelize.VIRTUAL,
           get() {
-            return `http://localhost:3001/products-file/${this.path}`
+            /** * 🌐 LÓGICA DE AMBIENTE:
+             * Se estivermos no Render, o NODE_ENV será 'production'.
+             * Caso contrário, usamos o localhost.
+             */
+            const base_url = process.env.NODE_ENV === 'production'
+              ? 'https://devburger-backend-a4zs.onrender.com'
+              : 'http://localhost:3001';
 
+            return `${base_url}/products-file/${this.path}`;
           }
         }
       },
